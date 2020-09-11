@@ -59,7 +59,9 @@ class Calculator(QWidget):
         degree_button = QPushButton("Degree", self)
         horizontal_angle_button = QPushButton("Horizontal Angle", self)
         gauss_area_button = QPushButton("Gauss Area", self)
+        import_data = QPushButton("Import coordinates", self)
         end_button = QPushButton("Finish work on today", self)
+        radian_button = QPushButton("Radian", self)
         end_button.resize(end_button.sizeHint())
 
         # adding buttons to layout
@@ -68,12 +70,14 @@ class Calculator(QWidget):
         Layout2.addWidget(length_button)
         Layout2.addWidget(grad_button)
         Layout2.addWidget(degree_button)
+        Layout2.addWidget(radian_button)
         Layout2.addWidget(horizontal_angle_button)
         Layout2.addWidget(gauss_area_button)
+        Layout2.addWidget(import_data)
 
         Layout.addLayout(Layout2, 2, 0, 2, 3)
         self.setLayout(Layout)
-        self.setGeometry(20, 20, 300, 100)
+        self.setGeometry(20, 20, 400, 100)
         self.setWindowIcon(QIcon('surveyor.jpg'))
         Layout.addWidget(end_button, 3, 0, 2, 3)
 
@@ -84,6 +88,9 @@ class Calculator(QWidget):
         degree_button.clicked.connect(self.perform_an_action)
         horizontal_angle_button.clicked.connect(self.perform_an_action)
         gauss_area_button.clicked.connect(self.perform_an_action)
+        radian_button.clicked.connect(self.perform_an_action)
+
+
 
     @staticmethod
     def count_difference(end, start):
@@ -95,45 +102,50 @@ class Calculator(QWidget):
         return end - start
 
     @staticmethod
-    def count_length(end_point: (tuple), start_point: (tuple)) -> float:
+    def count_length(end_point: list, start_point:list) -> float:
         """
         :param end_point: tuple contains: point number, coordinate x, coordinate y
         :param start_point: tuple contains: point number, coordinate x, coordinate y
         :return: return length  of section
         """
-        dx = end_point[1] - start_point[1]
-        dy = end_point[2] - start_point[2]
+        dx = end_point[0] - start_point[0]
+        dy = end_point[1] - start_point[1]
         return math.sqrt(dx ** 2 + dy ** 2)
 
-    def convert_degree_to_grad (self, degree: float) -> float:
+    @staticmethod
+    def convert_degree_to_grad(degree: float) -> float:
         """
         :param degree:  value provides by user
         :return:  value in grad
         """
         return degree * 10 / 9
 
-    def convert_grad_to_degree(self, grad: float) -> float:
+    @staticmethod
+    def convert_grad_to_degree(grad: float) -> float:
         """
         :param grad: value provides by user
         :return: value in  degree
         """
         return grad * 10 / 9
 
-    def convert_degree_to_radians(self, degree: float) -> float:
+    @staticmethod
+    def convert_degree_to_radians(degree: float) -> float:
         """
         :param degree: value  provides by user
         :return:
         """
         return degree * math.pi / 180
 
-    def convert_grad_to_radians (self, grad: float) -> float:
+    @staticmethod
+    def convert_grad_to_radians(grad: float) -> float:
         """
         :param grad:
         :return:
         """
         return grad * math.pi / 180
 
-    def count_azimuth(self, end_point, start_point) -> float:
+    @staticmethod
+    def count_azimuth(end_point: list, start_point: list) -> float:
         """
         azimuth - angle measures clockwise between north and line; always positive
 
@@ -163,7 +175,8 @@ class Calculator(QWidget):
         else:
             return 400 + angle
 
-    def count_horizontal_angle(self, left_point: tuple, centre_point: tuple, right_point: tuple) -> float:
+    @staticmethod
+    def count_horizontal_angle(left_point: list, centre_point: list, right_point: list) -> float:
         """
         counts horizontal angle between three points
         :param left_point:
@@ -171,9 +184,10 @@ class Calculator(QWidget):
         :param right_point:
         :return: horizontal angle
         """
-        return self.count_azimuth(left_point, centre_point) - self.count_azimuth(right_point, centre_point)
+        return Calculator.count_azimuth(left_point, centre_point) - Calculator.count_azimuth(right_point, centre_point)
 
-    def count_area_with_gauss(self, *points: list) -> float:
+    @staticmethod
+    def count_area_with_gauss(*points: list) -> float:
         """
         :param points: list contains  breakpoints of borders,
         a breakpoint  has got attributtes as  value  on x-axxis, y-xxis and  height; unit of measure: meter
@@ -183,7 +197,8 @@ class Calculator(QWidget):
         for count, point in enumerate(points):
             coordinate_increment = (points[count + 1][1] - points[count - 1][1]) * points[count][2]
             area += coordinate_increment
-            return area / 2
+
+        return area / 2
 
     def end(self) -> None:
         """
@@ -215,17 +230,27 @@ class Calculator(QWidget):
         sender_action = self.sender()
         try:
             point1 = [float(i) for i in self.point1.text().split()]
-            point2 = [float(i) for i in self.point1.text().split()]
-            point3 = [float(i) for i in self.point1.text().split()]
+            point2 = [float(i) for i in self.point2.text().split()]
+            point3 = [float(i) for i in self.point3.text().split()]
+            angle = float(self.angle.text())
             result = " "
 
             if sender_action.text() == "Azimuth":
                 result = self.count_azimuth(point1, point2)
-
+            elif sender_action.text() == "Length":
+                result = self.count_length(point1, point2)
+            elif sender_action.text() == "Gauss Area":
+                result = self.count_area_with_gauss(point1, point3, point2)
+            elif sender_action.text() == "Grad":
+                result = self.convert_degree_to_grad(angle)
+            elif sender_action.text() == "Degree":
+                result = self.convert_grad_to_degree(angle)
+            elif sender_action.text() == "Radian":
+                result = self.convert_degree_to_radians(angle)
             else:
                 result = 0
 
-            self.result.setText(str(result))
+            return self.result.setText(str(result))
 
         except ValueError:
             QMessageBox.warning(self, "Error", "Incorrrect Data", QMessageBox.Ok)
