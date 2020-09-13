@@ -1,10 +1,18 @@
 import sys
-import math
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QLineEdit
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QLabel, QGridLayout
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import Qt
+from function import (
+        count_length, convert_degree_to_radians,
+        convert_degree_to_grad,
+        convert_grad_to_radians,
+        count_azimuth,
+        convert_grad_to_degree,
+        count_horizontal_angle,
+        count_area_with_gauss
+)
 
 
 class Calculator(QWidget):
@@ -90,116 +98,6 @@ class Calculator(QWidget):
         gauss_area_button.clicked.connect(self.perform_an_action)
         radian_button.clicked.connect(self.perform_an_action)
 
-
-
-    @staticmethod
-    def count_difference(end, start):
-        """
-        :param end:
-        :param start:
-        :return:
-        """
-        return end - start
-
-    @staticmethod
-    def count_length(end_point: list, start_point:list) -> float:
-        """
-        :param end_point: tuple contains: point number, coordinate x, coordinate y
-        :param start_point: tuple contains: point number, coordinate x, coordinate y
-        :return: return length  of section
-        """
-        dx = end_point[0] - start_point[0]
-        dy = end_point[1] - start_point[1]
-        return math.sqrt(dx ** 2 + dy ** 2)
-
-    @staticmethod
-    def convert_degree_to_grad(degree: float) -> float:
-        """
-        :param degree:  value provides by user
-        :return:  value in grad
-        """
-        return degree * 10 / 9
-
-    @staticmethod
-    def convert_grad_to_degree(grad: float) -> float:
-        """
-        :param grad: value provides by user
-        :return: value in  degree
-        """
-        return grad * 10 / 9
-
-    @staticmethod
-    def convert_degree_to_radians(degree: float) -> float:
-        """
-        :param degree: value  provides by user
-        :return:
-        """
-        return degree * math.pi / 180
-
-    @staticmethod
-    def convert_grad_to_radians(grad: float) -> float:
-        """
-        :param grad:
-        :return:
-        """
-        return grad * math.pi / 180
-
-    @staticmethod
-    def count_azimuth(end_point: list, start_point: list) -> float:
-        """
-        azimuth - angle measures clockwise between north and line; always positive
-
-        :param end_point: tuple contains: point number, coordinate x, coordinate y
-        :param start_point: tuple contains: point number, coordinate x, coordinate y
-        :return: value of azimuth in grad
-        """
-
-        coordinate_increment_by_axxis_x = end_point[1] - start_point[1]
-        coordinate_increment_by_axxis_y = end_point[2] - start_point[2]
-        angle = math.degrees(math.atan(coordinate_increment_by_axxis_y / coordinate_increment_by_axxis_x))* 10/9
-
-        if coordinate_increment_by_axxis_x > 0 and coordinate_increment_by_axxis_y > 0:
-            return angle
-        elif coordinate_increment_by_axxis_x == 0 and coordinate_increment_by_axxis_y > 0:
-            return 100
-        elif coordinate_increment_by_axxis_x < 0 and coordinate_increment_by_axxis_y == 0:
-            return 200
-        elif coordinate_increment_by_axxis_x == 0 and coordinate_increment_by_axxis_y < 0:
-            return 300
-        elif coordinate_increment_by_axxis_x == 0 and coordinate_increment_by_axxis_y == 0:
-            return 0
-        elif coordinate_increment_by_axxis_x < 0 and coordinate_increment_by_axxis_y > 0:
-            return 200 + angle
-        elif coordinate_increment_by_axxis_x < 0 and coordinate_increment_by_axxis_y < 0:
-            return angle + 200
-        else:
-            return 400 + angle
-
-    @staticmethod
-    def count_horizontal_angle(left_point: list, centre_point: list, right_point: list) -> float:
-        """
-        counts horizontal angle between three points
-        :param left_point:
-        :param centre_point:
-        :param right_point:
-        :return: horizontal angle
-        """
-        return Calculator.count_azimuth(left_point, centre_point) - Calculator.count_azimuth(right_point, centre_point)
-
-    @staticmethod
-    def count_area_with_gauss(*points: list) -> float:
-        """
-        :param points: list contains  breakpoints of borders,
-        a breakpoint  has got attributtes as  value  on x-axxis, y-xxis and  height; unit of measure: meter
-        :return: area, unit [square meter]
-        """
-        area = 0
-        for count, point in enumerate(points):
-            coordinate_increment = (points[count + 1][1] - points[count - 1][1]) * points[count][2]
-            area += coordinate_increment
-
-        return area / 2
-
     def end(self) -> None:
         """
         closes program
@@ -229,24 +127,26 @@ class Calculator(QWidget):
     def perform_an_action(self):
         sender_action = self.sender()
         try:
-            point1 = [float(i) for i in self.point1.text().split()]
-            point2 = [float(i) for i in self.point2.text().split()]
-            point3 = [float(i) for i in self.point3.text().split()]
-            angle = float(self.angle.text())
+            point1 = [float(i.strip()) for i in self.point1.text().split()]
+            point2 = [float(i.strip()) for i in self.point2.text().split()]
+            point3 = [float(i.strip()) for i in self.point3.text().split()]
+            angle = float(self.angle.text().strip())
             result = " "
 
             if sender_action.text() == "Azimuth":
-                result = self.count_azimuth(point1, point2)
+                result = count_azimuth(point1, point2)
             elif sender_action.text() == "Length":
-                result = self.count_length(point1, point2)
+                result = count_length(point1, point2)
             elif sender_action.text() == "Gauss Area":
-                result = self.count_area_with_gauss(point1, point3, point2)
+                result = count_area_with_gauss(point1, point3, point2)
             elif sender_action.text() == "Grad":
-                result = self.convert_degree_to_grad(angle)
+                result = convert_degree_to_grad(angle)
             elif sender_action.text() == "Degree":
-                result = self.convert_grad_to_degree(angle)
+                result = convert_grad_to_degree(angle)
             elif sender_action.text() == "Radian":
-                result = self.convert_degree_to_radians(angle)
+                result = convert_degree_to_radians(angle)
+            elif sender_action.text() == "Horizontal Angle":
+                result = count_horizontal_angle
             else:
                 result = 0
 

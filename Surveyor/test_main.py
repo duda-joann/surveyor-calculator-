@@ -2,7 +2,7 @@ import unittest
 
 
 class TestCalculator(unittest.TestCase):
-    pass
+   pass
 
 
 if __name__ == '__main__':
