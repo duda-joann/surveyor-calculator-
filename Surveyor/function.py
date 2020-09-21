@@ -94,12 +94,13 @@ def count_horizontal_angle(left_point: list, centre_point: list, right_point: li
     return count_azimuth(left_point, centre_point) - count_azimuth(right_point, centre_point)
 
 
-def count_area_with_gauss(*points: list) -> float:
+def count_area_with_gauss(*args) -> float:
     """
     :param points: list contains  breakpoints of borders,
     a breakpoint  has got attributtes as  value  on x-axxis, y-xxis and  height; unit of measure: meter
     :return: area, unit [square meter]
     """
+    points = [item for item in args]
     area = 0
     for count, point in enumerate(points):
         if 1 <= count <= len(points)-2:
@@ -108,10 +109,13 @@ def count_area_with_gauss(*points: list) -> float:
         elif count == 0:
             coordinate_increment = (points[1][0] - points[-1][0]) * points[0][1]
             area += coordinate_increment
-        elif count == len(points) -1:
-            coordinate_increment = (points[0][0] - points[count - 1][0]) * points[count][1]
-            area += coordinate_increment
 
-    return area / 2
+        elif count == len(points) -1:
+                coordinate_increment = (points[0][0] - points[count - 1][0]) * points[count][1]
+                area += coordinate_increment
+
+    return abs(area / 2)
+
+
 
 

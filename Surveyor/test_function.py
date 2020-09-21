@@ -83,13 +83,13 @@ class TestHorizontalAngle(unittest.TestCase):
 
 class TestArea(unittest.TestCase):
     def test_count_area_with_gauss(self):
-        self.assertAlmostEqual(count_area_with_gauss([0,50], [0,0], [0,10]), 250)
+        self.assertAlmostEqual(count_area_with_gauss([0,50], [0,0], [10,0], [50,40]), 1450)
 
     def test_count_area_with_gauss2(self):
-        self.assertAlmostEqual(count_area_with_gauss([0,0], [10, 10], [0,10], [10,0]), 100)
+        self.assertAlmostEqual(count_area_with_gauss([0,0], [10, 10], [10,0], [10,0]), 50)
 
     def test_count_area_with_gauss3(self):
-        self.assertAlmostEqual(count_area_with_gauss([0,0], [10,50], [5, 25], [12, 18], [14, 10]), 171.00, 2)
+        self.assertAlmostEqual(count_area_with_gauss([0, 0], [5, 25],[10, 50], [12, 18], [14, 10]), 276.00, 2)
 
 
 class TestGradToDegree(unittest.TestCase):
